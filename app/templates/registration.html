@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="relative flex justify-center items-center min-h-screen bg-gray-900">
+    <div class="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-6 text-center text-gray-100">Registro de Participación</h2>
+        <form action="{{ url_for('registration.register_participation') }}" method="POST" class="space-y-4">
+            <div>
+                <label for="name" class="block text-gray-300 font-medium mb-2">Nombre</label>
+                <input type="text" id="name" name="name" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div>
+                <label for="email" class="block text-gray-300 font-medium mb-2">Correo</label>
+                <input type="email" id="email" name="email" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div>
+                <label for="curp" class="block text-gray-300 font-medium mb-2">CURP</label>
+                <input type="text" id="curp" name="curp" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            <div class="relative mb-6">
+                <label for="school" class="block text-gray-300 font-medium mb-2">Escuela</label>
+                <input type="text" id="school" name="school" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                <!-- Elemento para mostrar sugerencias -->
+                <div id="suggestions" class="absolute bg-gray-800 border border-gray-700 rounded-lg w-full mt-1 max-h-60 overflow-y-auto hidden z-20"></div>
+            </div>
+            <div>
+                <label for="school_cct" class="block text-gray-300 font-medium mb-2 flex items-center">
+                    CCT de Escuela
+                    <button type="button" data-modal-toggle="info-modal" class="ml-2 w-6 h-6 flex items-center justify-center text-gray-300 hover:text-gray-100 bg-gray-700 rounded-full text-xs">
+                        <span class="font-semibold">i</span>
+                    </button>
+                </label>
+                <input type="text" id="school_cct" name="school_cct" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1">
+            </div>
+            <div>
+                <label for="level" class="block text-gray-300 font-medium mb-2">Nivel</label>
+                <select id="level" name="level" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <option value="" disabled selected>Selecciona un nivel</option>
+                    <option value="NIVEL I">NIVEL I</option>
+                    <option value="NIVEL II">NIVEL II</option>
+                    <option value="NIVEL III">NIVEL III</option>
+                    <option value="NIVEL IV">NIVEL IV</option>
+                    <option value="NIVEL V">NIVEL V</option>
+                    <option value="NIVEL VI">NIVEL VI</option>
+                </select>
+            </div>
+            <div>
+                <label for="coach_name" class="block text-gray-300 font-medium mb-2">Entrenador</label>
+                <input type="text" id="coach_name" name="coach_name" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label for="coach_email" class="block text-gray-300 font-medium mb-2">Correo del Entrenador</label>
+                <input type="email" id="coach_email" name="coach_email" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label for="campus_id" class="block text-gray-300 font-medium mb-2">Sede</label>
+                <select id="campus_id" name="campus_id" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                    <option value="" disabled selected>Selecciona una sede</option>
+                    {% for campus in campuses %}
+                        <option value="{{ campus.id }}">{{ campus.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex items-center justify-between mt-4">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Registrar Participación</button>
+                <a href="{{ url_for('home.index') }}" class="text-blue-400 hover:underline">Inicio</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="info-modal" tabindex="-1" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 z-50 hidden">
+    <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <h3 class="text-lg font-bold text-gray-100 mb-4">Información</h3>
+        <p class="text-gray-300">En este campo coloca el CCT (Código de Centro de Trabajo) de tu escuela. Ten en cuenta que solo se podrán inscribir 6 alumnos por escuela.</p>
+        <button type="button" data-modal-toggle="info-modal" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('[data-modal-toggle]').forEach(button => {
+        button.addEventListener('click', () => {
+            const modalId = button.getAttribute('data-modal-toggle');
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+        });
+    });
+
+    document.getElementById('school_cct').addEventListener('input', function(event) {
+        const cct = this.value.trim();
+        const suggestions = document.getElementById('suggestions');
+        if (cct.length >= 6) {
+            fetch(`/school?cct=${encodeURIComponent(cct)}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestions.innerHTML = '';
+                if (data.school) {
+                    suggestions.classList.remove('hidden');
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.textContent = data.school;
+                    suggestionItem.classList.add('p-2', 'hover:bg-gray-700', 'cursor-pointer');
+                    suggestionItem.addEventListener('click', () => {
+                        document.getElementById('school').value = data.school;
+                        document.getElementById('school_cct').value = data.cct;
+                        suggestions.classList.add('hidden');
+                    });
+                    suggestions.appendChild(suggestionItem);
+                } else {
+                    suggestions.innerHTML = '<div class="p-2 text-gray-300">No hay coincidencias</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                suggestions.innerHTML = '<div class="p-2 text-red-500">Error al obtener las escuelas</div>';
+            });
+
+        } else {
+            suggestions.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!document.getElementById('suggestions').contains(event.target) &&
+            event.target.id !== 'school_cct') {
+            document.getElementById('suggestions').classList.add('hidden');
+        }
+    });
+</script>
+
+{% endblock %}
