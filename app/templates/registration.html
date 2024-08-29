@@ -17,12 +17,6 @@
                 <label for="curp" class="block text-gray-300 font-medium mb-2">CURP</label>
                 <input type="text" id="curp" name="curp" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
             </div>
-            <div class="relative mb-6">
-                <label for="school" class="block text-gray-300 font-medium mb-2">Escuela</label>
-                <input type="text" id="school" name="school" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
-                <!-- Elemento para mostrar sugerencias -->
-                <div id="suggestions" class="absolute bg-gray-800 border border-gray-700 rounded-lg w-full mt-1 max-h-60 overflow-y-auto hidden z-20"></div>
-            </div>
             <div>
                 <label for="school_cct" class="block text-gray-300 font-medium mb-2 flex items-center">
                     CCT de Escuela
@@ -31,6 +25,11 @@
                     </button>
                 </label>
                 <input type="text" id="school_cct" name="school_cct" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1">
+            </div>
+            <div class="relative mb-6">
+                <label for="school" class="block text-gray-300 font-medium mb-2">Escuela</label>
+                <input type="text" id="school" name="school" class="w-full px-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+                <div id="suggestions" class="absolute bg-gray-800 border border-gray-700 rounded-lg w-full mt-1 max-h-60 overflow-y-auto hidden z-20"></div>
             </div>
             <div>
                 <label for="level" class="block text-gray-300 font-medium mb-2">Nivel</label>
@@ -60,6 +59,10 @@
                         <option value="{{ campus.id }}">{{ campus.name }}</option>
                     {% endfor %}
                 </select>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="data_consent" name="data_consent" class="w-4 h-4 text-blue-600 bg-gray-800 border-gray-700 rounded focus:ring-blue-500 focus:ring-2" required>
+                <label for="data_consent" class="ml-2 text-gray-300">Autorizo el uso de mis datos para los fines establecidos.</label>
             </div>
             <div class="flex items-center justify-between mt-4">
                 <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Registrar Participación</button>

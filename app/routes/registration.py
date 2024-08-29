@@ -27,7 +27,7 @@ def register_participation():
 
         # Validar el número de participantes de la escuela
         limit_validation = StudentParticipation.query.filter_by(school_id=school.id).count()
-        if limit_validation >= 6:
+        if limit_validation >18:
             flash('El límite de 6 participantes por escuela ya fue alcanzado', 'danger')
             return redirect(url_for('registration.register_participation'))
 
