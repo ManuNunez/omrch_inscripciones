@@ -4,6 +4,19 @@
 <div class="relative flex justify-center items-center min-h-screen bg-gray-900">
     <div class="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-bold mb-6 text-center text-gray-100">Registro de Participación</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for category, message in messages %}
+                        <div class="p-4 mb-4 text-sm text-white {{ 'bg-red-500' if category == 'danger' else 'bg-green-500' }} rounded-lg">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
         <form action="{{ url_for('registration.register_participation') }}" method="POST" class="space-y-4">
             <div>
                 <label for="name" class="block text-gray-300 font-medium mb-2">Nombre</label>
@@ -72,12 +85,19 @@
     </div>
 </div>
 
-<!-- Modal -->
 <div id="info-modal" tabindex="-1" class="fixed inset-0 flex items-center justify-center p-4 bg-gray-900 bg-opacity-75 z-50 hidden">
     <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
         <h3 class="text-lg font-bold text-gray-100 mb-4">Información</h3>
         <p class="text-gray-300">En este campo coloca el CCT (Código de Centro de Trabajo) de tu escuela. Ten en cuenta que solo se podrán inscribir 6 alumnos por escuela.</p>
         <button type="button" data-modal-toggle="info-modal" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Cerrar</button>
+    </div>
+</div>
+
+<div id="errorModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-4 max-w-sm w-full">
+        <h2 class="text-xl font-semibold text-red-600">Error</h2>
+        <p id="errorMessage" class="text-gray-700 mt-2"></p>
+        <button id="closeModal" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Cerrar</button>
     </div>
 </div>
 
@@ -91,11 +111,16 @@
     });
 
     document.getElementById('school_cct').addEventListener('input', function(event) {
-        const cct = this.value.trim();
-        const suggestions = document.getElementById('suggestions');
-        if (cct.length >= 6) {
-            fetch(`/school?cct=${encodeURIComponent(cct)}`)
-            .then(response => response.json())
+    const cct = this.value.trim();
+    const suggestions = document.getElementById('suggestions');
+    if (cct.length >= 6) {
+        fetch(`/school?cct=${encodeURIComponent(cct)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+                return response.json();
+            })
             .then(data => {
                 suggestions.innerHTML = '';
                 if (data.school) {
@@ -110,25 +135,27 @@
                     });
                     suggestions.appendChild(suggestionItem);
                 } else {
-                    suggestions.innerHTML = '<div class="p-2 text-gray-300">No hay coincidencias</div>';
+                    suggestions.classList.add('hidden');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                suggestions.innerHTML = '<div class="p-2 text-red-500">Error al obtener las escuelas</div>';
+                console.error('Error fetching school data:', error);
+                showErrorModal('Hubo un problema al obtener los datos de la escuela. Por favor, intenta de nuevo.');
             });
+    } else {
+        suggestions.classList.add('hidden');
+    }
+});
 
-        } else {
-            suggestions.classList.add('hidden');
-        }
+
+    document.getElementById('closeModal').addEventListener('click', () => {
+        document.getElementById('errorModal').classList.add('hidden');
     });
 
-    document.addEventListener('click', function(event) {
-        if (!document.getElementById('suggestions').contains(event.target) &&
-            event.target.id !== 'school_cct') {
-            document.getElementById('suggestions').classList.add('hidden');
-        }
-    });
+    function showError(message) {
+        const modal = document.getElementById('errorModal');
+        document.getElementById('errorMessage').textContent = message;
+        modal.classList.remove('hidden');
+    }
 </script>
-
 {% endblock %}

@@ -1,43 +1,53 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models import db, StudentParticipation, Campus, School
+from app.utils.email_utils import send_confirmation_email
 
 registration_bp = Blueprint('registration', __name__)
 
 @registration_bp.route('/register', methods=['GET', 'POST'])
 def register_participation():
     if request.method == 'POST':
+        # Obtención de datos del formulario
         cct = request.form.get('school_cct')
         form_name = request.form.get('name')
         form_email = request.form.get('email')
         form_curp = request.form.get('curp')
-        form_school_name = request.form.get('school')  # Nombre de la escuela recibido desde el formulario
+        form_school_name = request.form.get('school')
         form_coach_name = request.form.get('coach_name')
         form_coach_email = request.form.get('coach_email')
         form_campus_id = request.form.get('campus_id')
-        form_level = request.form.get('level')  # Capturando el nivel seleccionado desde el formulario
+        form_level = request.form.get('level')
 
-        # Configurar score por defecto a 0
+        # Establecer el puntaje inicial a cero
         score = 0
 
-        # Buscar la instancia de School según el CCT
+        # Validación de la existencia de la escuela
         school = School.query.filter_by(cct=cct).first()
         if not school:
             flash('La escuela no existe en la base de datos', 'danger')
             return redirect(url_for('registration.register_participation'))
 
-        # Validar el número de participantes de la escuela
+
+        # Validación de CURP ya registrada
+        existing_participant = StudentParticipation.query.filter_by(curp=form_curp).first()
+        if existing_participant:
+            flash('Esta CURP ya ha sido registrada en una participación.', 'danger')
+            return redirect(url_for('registration.register_participation'))
+        
+
+        # Validación del límite de participantes por escuela
         limit_validation = StudentParticipation.query.filter_by(school_id=school.id).count()
-        if limit_validation >18:
-            flash('El límite de 6 participantes por escuela ya fue alcanzado', 'danger')
+        if limit_validation >= 18:
+            flash('El límite de 18 participantes por escuela ya fue alcanzado', 'danger')
             return redirect(url_for('registration.register_participation'))
 
-        # Obtener el número de participantes en la sede seleccionada para generar el código
-        num_participants = StudentParticipation.query.filter_by(campus_id=form_campus_id).count()
 
-        # Generar el código de participante en el formato <id de la sede>_<número de participante>
+
+        # Generación del código de participación
+        num_participants = StudentParticipation.query.filter_by(campus_id=form_campus_id).count()
         participation_code = f"{form_campus_id}_{num_participants + 1}"
 
-        # Crear instancia de StudentParticipation
+        # Creación de una nueva participación
         participation = StudentParticipation(
             name=form_name,
             email=form_email,
@@ -48,20 +58,28 @@ def register_participation():
             participation_code=participation_code,
             score=score,
             campus_id=form_campus_id,
-            level=form_level  # Asignar el nivel seleccionado
+            level=form_level
         )
 
         try:
+            # Guardar la participación en la base de datos
             db.session.add(participation)
             db.session.commit()
-            print('Participación guardada con éxito')  # Mensaje de depuración
             flash('Participación registrada con éxito', 'success')
+            
+            # Enviar correo de confirmación
+            try:
+                send_confirmation_email(participation)
+            except Exception as e:
+                print(f'Error al enviar el correo de confirmación: {e}')
+            
             return redirect(url_for('home.index'))
         except Exception as e:
+            # Manejo de errores en la transacción
             db.session.rollback()
-            print(f'Ocurrió un error al guardar la participación: {e}')  # Imprime el error
             flash(f'Ocurrió un error al guardar la participación: {e}', 'danger')
             return redirect(url_for('registration.register_participation'))
 
+    # Obtener los campus para mostrar en el formulario
     campuses = Campus.query.all()
     return render_template('registration.html', campuses=campuses)
