@@ -4,7 +4,7 @@ from app.utils.email_utils import send_confirmation_email
 
 registration_bp = Blueprint('registration', __name__)
 
-@registration_bp.route('/register', methods=['GET', 'POST'])
+@registration_bp.route('/register', methods=['GET', 'POST'])        # Convert regular maps URL to embed format
 def register_participation():
     if request.method == 'POST':
         # Obtención de datos del formulario
@@ -37,7 +37,7 @@ def register_participation():
 
         # Validación del límite de participantes por escuela
         limit_validation = StudentParticipation.query.filter_by(school_id=school.id).count()
-        if limit_validation >= 18:
+        if limit_validation >= 18*3:
             flash('El límite de 18 participantes por escuela ya fue alcanzado', 'danger')
             return redirect(url_for('registration.register_participation'))
 
