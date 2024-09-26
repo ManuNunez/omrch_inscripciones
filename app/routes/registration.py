@@ -68,10 +68,11 @@ def register_participation():
             flash('Participación registrada con éxito', 'success')
             
             # Enviar correo de confirmación
-            try:
-                send_confirmation_email(participation)
-            except Exception as e:
-                print(f'Error al enviar el correo de confirmación: {e}')
+            # try:
+            #     send_confirmation_email(participation)
+            
+            # except Exception as e:
+            #     print(f'Error al enviar el correo de confirmación: {e}')
             
             return redirect(url_for('home.index'))
         except Exception as e:
